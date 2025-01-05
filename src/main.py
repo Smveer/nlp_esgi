@@ -1,6 +1,6 @@
 import click
 import joblib
-
+import requests
 from data import make_dataset
 from feature import make_features
 from models import make_model
@@ -8,6 +8,17 @@ from models import make_model
 @click.group()
 def cli():
     pass
+
+@click.command()
+@click.option("--key", default="1HBs08WE5DLcHEfS6MqTivbyYlRnajfSVnTiKxKVu7Vs", help="Google sheet file key")
+@click.option("--id", default="1482158622", help="Google sheet file sheet id")
+@click.option("--path_to", default="../data/raw/train.csv", help="Where to download the sheet")
+def download_google_sheet_as_csv(key, id, path_to):
+    url = "https://docs.google.com/spreadsheets/d/{key}/gviz/tq?tqx=out:csv&sheet={id}"
+    output_file = path_to
+    response = requests.get(url)
+    with open(output_file, 'wb') as file:
+        file.write(response.content)
 
 
 @click.command()
@@ -53,6 +64,7 @@ def evaluate_model(model, X, y):
     pass
 
 
+cli.add_command(download_google_sheet_as_csv)
 cli.add_command(train)
 cli.add_command(predict)
 cli.add_command(evaluate)
